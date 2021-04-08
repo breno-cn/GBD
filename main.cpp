@@ -11,6 +11,7 @@
 
 class MeuArquivo {
 public:
+                                            // offset do primeiro disponivel
     struct cabecalho { int quantidade; int disponivel; } cabecalho;
     struct registro { int quantidade; int disponivel; } registro;
 
@@ -27,6 +28,14 @@ public:
     // Destrutor: fecha arquivo
     ~MeuArquivo() {
         fclose(fd);
+    }
+
+    void atualizarCabecalho(int quantidade, int offset) {
+        fseek(this->fd, 0, SEEK_SET);
+
+        cabecalho.quantidade++;
+        cabecalho.disponivel = offset;
+        fwrite(&cabecalho, sizeof(struct cabecalho), 1, this->fd);
     }
 
     // Insere uma nova palavra, consulta se há espaco disponível ou se deve inserir no final
@@ -53,11 +62,8 @@ public:
         // printf("offsetAtual = %d\n", offsetAtual);
 
         // atualizar cabecalho
-        fseek(this->fd, 0, SEEK_SET);
-
-        cabecalho.quantidade++;
-        cabecalho.disponivel = offsetAtual;
-        fwrite(&cabecalho, sizeof(struct cabecalho), 1, this->fd);
+        int quantidadeNova = cabecalho.quantidade + 1;
+        atualizarCabecalho(quantidadeNova, offsetAtual);
     }
 
     // Marca registro como removido, atualiza lista de disponíveis, incluindo o cabecalho
