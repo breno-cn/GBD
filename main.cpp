@@ -34,11 +34,30 @@ public:
         this->substituiBarraNporBarraZero(palavra); // funcao auxiliar substitui terminador por \0
 
         // implementar aqui
+
+        // ler o cabecalho
+        fseek(this->fd, 0, SEEK_SET);
+        fread(&cabecalho, sizeof(struct cabecalho), 1, this->fd);
+
+        // ir para a posicao descrita no cabecalho
+        fseek(this->fd, cabecalho.disponivel + sizeof(struct cabecalho), SEEK_SET);
+
         int tamanho = strlen(palavra);
+
+        // registro novo da palavra
         registro.quantidade = tamanho;
         registro.disponivel = 0;
         fwrite(&registro, sizeof(struct registro), 1, this->fd);
         fwrite(palavra, sizeof(char), tamanho + 1, this->fd);
+        int offsetAtual = ftell(this->fd);
+        // printf("offsetAtual = %d\n", offsetAtual);
+
+        // atualizar cabecalho
+        fseek(this->fd, 0, SEEK_SET);
+
+        cabecalho.quantidade++;
+        cabecalho.disponivel = offsetAtual;
+        fwrite(&cabecalho, sizeof(struct cabecalho), 1, this->fd);
     }
 
     // Marca registro como removido, atualiza lista de disponíveis, incluindo o cabecalho
