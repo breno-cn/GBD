@@ -1,3 +1,5 @@
+// desenvolvido e testado em ambiente Linux
+
 /* 
  * File:   main.cpp
  * Author: seunome
@@ -16,6 +18,10 @@ public:
     // Entretando recriaremos o arquivo a cada execucao ("w+").
     MeuArquivo() {
         fd = fopen("dados.dat","w+");
+
+        cabecalho.disponivel = 0;
+        cabecalho.quantidade = 0;
+        fwrite(&cabecalho, sizeof(struct cabecalho), 1, fd);
     }
 
     // Destrutor: fecha arquivo
@@ -28,6 +34,11 @@ public:
         this->substituiBarraNporBarraZero(palavra); // funcao auxiliar substitui terminador por \0
 
         // implementar aqui
+        int tamanho = strlen(palavra);
+        registro.quantidade = tamanho;
+        registro.disponivel = 0;
+        fwrite(&registro, sizeof(struct registro), 1, this->fd);
+        fwrite(palavra, sizeof(char), tamanho + 1, this->fd);
     }
 
     // Marca registro como removido, atualiza lista de disponíveis, incluindo o cabecalho
