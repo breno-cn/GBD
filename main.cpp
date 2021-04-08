@@ -49,7 +49,7 @@ public:
         registro.disponivel = 0;
         fwrite(&registro, sizeof(struct registro), 1, this->fd);
         fwrite(palavra, sizeof(char), tamanho + 1, this->fd);
-        int offsetAtual = ftell(this->fd);
+        int offsetAtual = ftell(this->fd) - tamanho - sizeof(struct registro);
         // printf("offsetAtual = %d\n", offsetAtual);
 
         // atualizar cabecalho
