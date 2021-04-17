@@ -33,7 +33,7 @@ public:
     void atualizarCabecalho(int quantidade, int offset) {
         fseek(this->fd, 0, SEEK_SET);
 
-        cabecalho.quantidade++;
+        cabecalho.quantidade = quantidade;
         cabecalho.disponivel = offset;
         fwrite(&cabecalho, sizeof(struct cabecalho), 1, this->fd);
     }
