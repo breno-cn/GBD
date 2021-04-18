@@ -100,20 +100,23 @@ public:
         // printf("palavra encontrada em TESTE: %s\n", buffer);
         // printf("%d\t%d\n", registro.quantidade, registro.disponivel);
 
-
-        while (1) {
-            if (feof(this->fd))
-                return -1;
-
+        bool devePularPalavra = false;
+        while (!feof(this->fd)) {
             fread(&registro, sizeof(struct registro), 1, this->fd);
             // Encontrado uma palavra com o mesmo tamanho, testar igualdade
             if (registro.quantidade == tamanhoPalavra) {
+                // printf("AQUI\n");
                 fread(&buffer, sizeof(char), registro.quantidade, this->fd);
-                if (strcmp(palavra, buffer) == 0) {
+                printf("%s\t%s\n", palavra, buffer);
+                if (strncmp(palavra, buffer, tamanhoPalavra) == 0) {
                     return ftell(this->fd) - tamanhoPalavra - sizeof(struct registro);
                 }
+                devePularPalavra = true;
             }
-            fseek(this->fd, registro.quantidade, SEEK_CUR);
+            if (devePularPalavra) {
+                fseek(this->fd, registro.quantidade, SEEK_CUR);
+                devePularPalavra = false;
+            }
         }
 
         // retornar -1 caso nao encontrar
