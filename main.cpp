@@ -90,13 +90,31 @@ public:
         // pula para o primeiro registro
         // leitura do cabecalho
         fseek(this->fd, sizeof(struct cabecalho), SEEK_SET);
+        int tamanhoPalavra = strlen(palavra);
+        char buffer[256];
 
         // TESTE
-        fread(&registro, sizeof(struct registro), 1, this->fd);
-        char buffer[256];
-        fread(&buffer, sizeof(char), registro.quantidade, this->fd);
-        printf("palavra encontrada em TESTE: %s\n", buffer);
-        printf("%d\t%d\n", registro.quantidade, registro.disponivel);
+        // fread(&registro, sizeof(struct registro), 1, this->fd);
+        // char buffer[256];
+        // fread(&buffer, sizeof(char), registro.quantidade, this->fd);
+        // printf("palavra encontrada em TESTE: %s\n", buffer);
+        // printf("%d\t%d\n", registro.quantidade, registro.disponivel);
+
+
+        while (1) {
+            if (feof(this->fd))
+                return -1;
+
+            fread(&registro, sizeof(struct registro), 1, this->fd);
+            // Encontrado uma palavra com o mesmo tamanho, testar igualdade
+            if (registro.quantidade == tamanhoPalavra) {
+                fread(&buffer, sizeof(char), registro.quantidade, this->fd);
+                if (strcmp(palavra, buffer) == 0) {
+                    return ftell(this->fd) - tamanhoPalavra - sizeof(struct registro);
+                }
+            }
+            fseek(this->fd, registro.quantidade, SEEK_CUR);
+        }
 
         // retornar -1 caso nao encontrar
         return -1;
