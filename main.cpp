@@ -35,12 +35,15 @@ public:
 
         cabecalho.quantidade = quantidade;
         cabecalho.disponivel = offset;
+
+        // printf("%d\t%d\n", cabecalho.disponivel, cabecalho.quantidade);
         fwrite(&cabecalho, sizeof(struct cabecalho), 1, this->fd);
     }
 
     // Insere uma nova palavra, consulta se há espaco disponível ou se deve inserir no final
     void inserePalavra(char *palavra) {
         this->substituiBarraNporBarraZero(palavra); // funcao auxiliar substitui terminador por \0
+        // printf("inserindo palavra %s\n", palavra);
 
         // implementar aqui
 
@@ -58,8 +61,16 @@ public:
         registro.disponivel = 0;
         fwrite(&registro, sizeof(struct registro), 1, this->fd);
         fwrite(palavra, sizeof(char), tamanho + 1, this->fd);
-        int offsetAtual = ftell(this->fd) - tamanho - sizeof(struct registro);
-        // printf("offsetAtual = %d\n", offsetAtual);
+
+        // tamanho minimo
+        // char *minimo = "*****";
+        if (tamanho < 5) {
+            for (int i = 0; i < tamanho - 5; i++)
+                fwrite("*", 1, 1, this->fd);
+        }
+
+        int offsetAtual = ftell(this->fd);
+        // printf("ftell = %d\n", offsetAtual);
 
         // atualizar cabecalho
         int quantidadeNova = cabecalho.quantidade + 1;
@@ -76,35 +87,36 @@ public:
     int buscaPalavra(char *palavra) {
         this->substituiBarraNporBarraZero(palavra); // funcao auxiliar substitui terminador por \0
 
-        // implementar aqui
+        // pula para o primeiro registro
+        // leitura do cabecalho
+        fseek(this->fd, sizeof(struct cabecalho), SEEK_SET);
+        int tamanhoPalavra = strlen(palavra);
+        char buffer[256];
 
-        // ler o cabecalho
-        fseek(this->fd, 0, SEEK_SET);
-        fread(&cabecalho, sizeof(struct cabecalho), 1, this->fd);
+        // TESTE
+        // fread(&registro, sizeof(struct registro), 1, this->fd);
+        // char buffer[256];
+        // fread(&buffer, sizeof(char), registro.quantidade, this->fd);
+        // printf("palavra encontrada em TESTE: %s\n", buffer);
+        // printf("%d\t%d\n", registro.quantidade, registro.disponivel);
 
-        // obter a quantidade de registros salvos
-        int quantidade = cabecalho.quantidade;
-        int tamanho = strlen(palavra);
-        
-        // posicionar offset do primeiro registro
-        fseek(this->fd, cabecalho.disponivel , SEEK_SET);
-
-        printf("quantidade: %d\n", quantidade);
-        printf("disponivel: %d\n", cabecalho.disponivel);
-        for( int i=0; i<quantidade; i++ ) {
-
-            fread(&registro, sizeof(struct registro), 1 , this->fd);
-            char * word = (char *) malloc(sizeof(char) * registro.quantidade);
-            fread(&word, registro.quantidade, 1 , this->fd);
-
-            substituiBarraNporBarraZero(word);
-            // printf("word: \"%s\"\n", word);
-
-            // verificar se o registro esta ocupado e tem o msm tamanho da palavra
-            if(registro.disponivel == 0 && registro.quantidade == tamanho) {
-                if(strcmp(word, palavra) == 0) return ftell(this->fd);
+        bool devePularPalavra = false;
+        while (!feof(this->fd)) {
+            fread(&registro, sizeof(struct registro), 1, this->fd);
+            // Encontrado uma palavra com o mesmo tamanho, testar igualdade
+            if (registro.quantidade == tamanhoPalavra) {
+                // printf("AQUI\n");
+                fread(&buffer, sizeof(char), registro.quantidade, this->fd);
+                printf("%s\t%s\n", palavra, buffer);
+                if (strncmp(palavra, buffer, tamanhoPalavra) == 0) {
+                    return ftell(this->fd) - tamanhoPalavra - sizeof(struct registro);
+                }
+                devePularPalavra = true;
             }
-
+            if (devePularPalavra) {
+                fseek(this->fd, registro.quantidade, SEEK_CUR);
+                devePularPalavra = false;
+            }
         }
 
         // retornar -1 caso nao encontrar
