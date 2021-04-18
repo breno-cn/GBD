@@ -57,10 +57,11 @@ public:
         int tamanho = strlen(palavra);
 
         // registro novo da palavra
-        registro.quantidade = tamanho;
+        // registro.quantidade = tamanho;
+        registro.quantidade = tamanho < 5 ? 5 : tamanho;
         registro.disponivel = 0;
         fwrite(&registro, sizeof(struct registro), 1, this->fd);
-        fwrite(palavra, sizeof(char), tamanho + 1, this->fd);
+        fwrite(palavra, sizeof(char), tamanho, this->fd);
 
         // tamanho minimo
         // char *minimo = "*****";
@@ -91,6 +92,7 @@ public:
         // leitura do cabecalho
         fseek(this->fd, sizeof(struct cabecalho), SEEK_SET);
         int tamanhoPalavra = strlen(palavra);
+        tamanhoPalavra = tamanhoPalavra < 5 ? 5 : tamanhoPalavra;
         char buffer[256];
 
         // TESTE
@@ -106,13 +108,14 @@ public:
             // Encontrado uma palavra com o mesmo tamanho, testar igualdade
             if (registro.quantidade == tamanhoPalavra) {
                 // printf("AQUI\n");
-                fread(&buffer, sizeof(char), registro.quantidade, this->fd);
+                fread(&buffer, sizeof(char), tamanhoPalavra, this->fd);
                 printf("%s\t%s\n", palavra, buffer);
                 if (strncmp(palavra, buffer, tamanhoPalavra) == 0) {
                     return ftell(this->fd) - tamanhoPalavra - sizeof(struct registro);
                 }
                 devePularPalavra = true;
             }
+
             if (devePularPalavra) {
                 fseek(this->fd, registro.quantidade, SEEK_CUR);
                 devePularPalavra = false;
