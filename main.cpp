@@ -92,15 +92,8 @@ public:
         // leitura do cabecalho
         fseek(this->fd, sizeof(struct cabecalho), SEEK_SET);
         int tamanhoPalavra = strlen(palavra);
-        tamanhoPalavra = tamanhoPalavra < 5 ? 5 : tamanhoPalavra;
+        // tamanhoPalavra = tamanhoPalavra < 5 ? 5 : tamanhoPalavra;
         char buffer[256];
-
-        // TESTE
-        // fread(&registro, sizeof(struct registro), 1, this->fd);
-        // char buffer[256];
-        // fread(&buffer, sizeof(char), registro.quantidade, this->fd);
-        // printf("palavra encontrada em TESTE: %s\n", buffer);
-        // printf("%d\t%d\n", registro.quantidade, registro.disponivel);
 
         bool devePularPalavra = false;
         while (!feof(this->fd)) {
