@@ -80,6 +80,13 @@ public:
     // Marca registro como removido, atualiza lista de disponíveis, incluindo o cabecalho
     void removePalavra(int offset) {
         // implementar aqui
+        fseek(this->fd, offset, SEEK_SET);
+        fread(&registro, sizeof(struct registro), 1, this->fd);
+        registro.disponivel = 1;
+        fseek(this->fd, -sizeof(struct registro), SEEK_CUR);
+        fwrite(&registro, sizeof(struct registro), 1, this->fd);
+        fwrite("*", sizeof(char), 1, this->fd);
+        this->atualizarCabecalho(this->cabecalho.quantidade - 1, offset < cabecalho.disponivel ? offset : cabecalho.disponivel);
     }
 
     // BuscaPalavra: retorno é o offset para o registro
